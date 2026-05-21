@@ -611,7 +611,19 @@ function parse(txt){
   const im=txt.match(/IMMAGINE:\s*([^\n]+)/i);
   const img=im?im[1].trim():null;
   const imgCap=img?img.slice(0,50):'';
-  let nar=txt.replace(/\[\d\][^\n]*/g,'').replace(/IMMAGINE:[^\n]*/gi,'').replace(/DANNO:\s*\d+/gi,'').replace(/INFLUENZA:\s*[+-]?\d+/gi,'').replace(/MORALE:\s*[+-]?\d+/gi,'').replace(/FAZIONE_ALLEATA:\s*\w+/gi,'').replace(/RIVOLUZIONE:\s*[+-]?\d+/gi,'').replace(/\n{3,}/g,'\n\n').trim();
+  // Debug: log raw text
+  console.log('RAW:', txt.slice(0,200));
+  let nar=txt
+    .replace(/\[\d+\][^\n]*/g,'')
+    .replace(/IMMAGINE:[^\n]*/gi,'')
+    .replace(/DANNO:\s*\d+/gi,'')
+    .replace(/INFLUENZA:\s*[+-]?\d+/gi,'')
+    .replace(/MORALE:\s*[+-]?\d+/gi,'')
+    .replace(/FAZIONE_ALLEATA:\s*\w+/gi,'')
+    .replace(/RIVOLUZIONE:\s*[+-]?\d+/gi,'')
+    .replace(/\n{3,}/g,'\n\n')
+    .trim();
+  if(!nar||nar.length<10) nar=txt.split('\n').filter(l=>!l.match(/^\[\d\]|IMMAGINE:|DANNO:|INFLUENZA:|MORALE:|FAZIONE|RIVOLUZIONE:/i)&&l.trim()).join(' ').trim();
   return{nar,choices,img,imgCap};
 }
 
