@@ -573,13 +573,28 @@ async function callAI(prompt,first=false){
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:sysPrompt(),messages:msgs})
     });
     const d=await r.json();
-    const txt=d.content?.map(b=>b.text||'').join('')||'';
+    console.log('API response:', JSON.stringify(d).slice(0,300));
+    // Handle both direct and proxy response formats
+    let txt='';
+    if(d.content && Array.isArray(d.content)){
+      txt=d.content.map(b=>b.text||'').join('');
+    } else if(d.error){
+      txt='Errore API: '+d.error.message;
+    } else {
+      txt=JSON.stringify(d).slice(0,200);
+    }
     hideLoad();
+    if(!txt||txt.length<5){
+      addMsg('nar','Errore di connessione — riprova.','📖 Cronache del Cyberstato');
+      defaultChoices();
+      G.busy=false;document.getElementById('sendBtn').disabled=false;
+      return;
+    }
     const p=parse(txt);
     G.hist.push({role:'user',content:prompt},{role:'assistant',content:txt});
     if(G.hist.length>20)G.hist=G.hist.slice(-16);
     if(p.img)addImg(p.img,p.imgCap||'Scena corrente');
-    addMsg('nar',p.nar,'📖 Cronache del Cyberstato');
+    addMsg('nar',p.nar||txt.slice(0,500),'📖 Cronache del Cyberstato');
     applyFx(txt);
     G.log.unshift({t:G.turn+1,txt:p.nar.slice(0,80)+'...'});
     if(G.log.length>20)G.log.pop();
