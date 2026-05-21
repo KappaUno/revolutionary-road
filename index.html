@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Revolutionary Road</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rust:#8B3A0F;--rust-bright:#C0521A;--coal:#0D0B09;--coal2:#161210;
+  --coal3:#1E1A15;--coal4:#2A2318;--coal5:#362E20;
+  --brass:#B8860B;--brass-light:#DAA520;--brass-dim:#6B5A0A;
+  --steam:#7A9EA8;--steam-dim:#3A5A64;
+  --red:#8B0000;--red-bright:#CC2200;
+  --text:#D4C4A0;--text-dim:#7A6A50;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--coal);color:var(--text);
+  font-family:'IM Fell English',Georgia,serif;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(184,134,11,.015) 2px,rgba(184,134,11,.015) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(184,134,11,.01) 40px,rgba(184,134,11,.01) 41px);
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse at 0% 0%,rgba(139,58,15,.12) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 100%,rgba(122,158,168,.08) 0%,transparent 50%);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:200;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.03) 0px,rgba(0,0,0,.03) 1px,transparent 1px,transparent 3px);
+}
+#app{position:relative;z-index:2;height:100dvh;display:flex;flex-direction:column;max-width:500px;margin:0 auto}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;height:100dvh;overflow:hidden}
+.screen.active{display:flex}
+
+/* INTRO */
+#screen-intro{
+  align-items:center;justify-content:center;padding:2rem 1.5rem;gap:1.1rem;
+  text-align:center;animation:fadeIn 1.5s ease;
+  background:radial-gradient(ellipse at 50% 30%,rgba(139,58,15,.15) 0%,transparent 60%);
+}
+.anarchy-logo{
+  width:100px;height:100px;
+  animation:logoPulse 3s ease-in-out infinite;
+  filter:drop-shadow(0 0 16px rgba(204,34,0,.5));
+}
+@keyframes logoPulse{0%,100%{filter:drop-shadow(0 0 10px rgba(204,34,0,.4))}50%{filter:drop-shadow(0 0 28px rgba(204,34,0,.8))}}
+.game-title{
+  font-family:'Special Elite',serif;font-size:2rem;color:var(--brass-light);
+  text-shadow:0 0 30px rgba(184,134,11,.5),2px 2px 0 rgba(0,0,0,.8);
+  line-height:1.1;letter-spacing:.05em;
+}
+.game-subtitle{font-size:.7rem;color:var(--steam);letter-spacing:.3em;text-transform:uppercase;font-family:'Share Tech Mono',monospace}
+.intro-lore{
+  font-size:.9rem;line-height:1.8;color:var(--text-dim);font-style:italic;
+  border-left:2px solid var(--rust);padding-left:1rem;text-align:left;max-width:300px;
+}
+.divider{width:100%;display:flex;align-items:center;gap:.75rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--brass-dim),transparent)}
+.divider span{color:var(--brass-dim);font-size:.8rem}
+
+/* BUTTONS */
+.btn{
+  background:transparent;border:1px solid var(--brass-dim);border-radius:3px;
+  padding:.8rem 2rem;color:var(--brass);font-family:'Special Elite',serif;
+  font-size:.9rem;letter-spacing:.08em;cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;text-transform:uppercase;
+}
+.btn.primary{background:linear-gradient(135deg,var(--rust) 0%,var(--coal3) 100%);border-color:var(--rust-bright);color:var(--text)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.35;pointer-events:none}
+
+/* CHAR */
+#screen-char{overflow-y:auto}
+#screen-char>div{padding:1.2rem;display:flex;flex-direction:column;gap:1rem}
+.screen-title{
+  font-family:'Special Elite',serif;font-size:1rem;color:var(--brass-light);
+  text-align:center;padding-bottom:.5rem;border-bottom:1px solid var(--coal5);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.field-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--brass-dim);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.3rem}
+.text-input{
+  width:100%;background:var(--coal3);border:1px solid var(--coal5);border-radius:3px;
+  padding:.7rem 1rem;color:var(--text);font-family:'IM Fell English',serif;font-size:1rem;outline:none;
+}
+.text-input:focus{border-color:var(--brass-dim)}
+.text-input::placeholder{color:var(--text-dim);font-style:italic}
+.faction-list{display:flex;flex-direction:column;gap:.6rem}
+.faction-card{
+  background:var(--coal3);border:1px solid var(--coal5);border-radius:4px;
+  padding:.85rem 1rem;cursor:pointer;transition:all .2s;
+  display:flex;align-items:flex-start;gap:.75rem;position:relative;overflow:hidden;
+}
+.faction-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .2s}
+.faction-card.selected{border-color:var(--rust-bright);background:var(--coal4)}
+.faction-card.selected::after{background:var(--rust-bright)!important}
+.faction-card:active{transform:scale(.98)}
+.faction-icon{font-size:1.8rem;flex-shrink:0}
+.faction-name{font-family:'Special Elite',serif;font-size:.85rem;color:var(--brass-light);margin-bottom:.2rem;text-transform:uppercase}
+.faction-desc{font-size:.8rem;color:var(--text-dim);line-height:1.5;font-style:italic}
+.faction-stats{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--steam-dim);margin-top:.3rem}
+
+/* GAME */
+#screen-game{display:none}
+#screen-game.active{display:flex;flex-direction:column}
+
+/* HUD */
+.hud{
+  background:linear-gradient(180deg,var(--coal) 0%,var(--coal2) 100%);
+  border-bottom:1px solid var(--coal5);padding:.5rem .75rem;flex-shrink:0;
+}
+.hud-top{display:flex;align-items:center;gap:.6rem}
+.hud-avatar{
+  width:36px;height:36px;border-radius:50%;border:2px solid var(--brass-dim);
+  background:var(--coal3);display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;
+}
+.hud-name{font-family:'Special Elite',serif;font-size:.8rem;color:var(--brass-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hud-sub{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--steam-dim)}
+.hud-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end}
+.rev-label{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--red-bright);letter-spacing:.1em;text-transform:uppercase}
+.rev-track{width:68px;height:7px;background:var(--coal4);border:1px solid var(--coal5);border-radius:2px;overflow:hidden;margin-top:2px}
+.rev-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--red-bright));transition:width .8s ease}
+.rev-pct{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--red-bright);text-align:right;margin-top:1px}
+.hud-stats{display:flex;gap:.45rem;margin-top:.35rem;flex-wrap:wrap}
+.mini-stat{display:flex;align-items:center;gap:3px}
+.mini-bar{width:38px;height:5px;background:var(--coal4);border-radius:2px;overflow:hidden}
+.mini-fill{height:100%;border-radius:2px;transition:width .4s}
+.fill-hp{background:linear-gradient(90deg,#5a1010,#aa2020)}
+.fill-inf{background:linear-gradient(90deg,#1a3a5c,#2980b9)}
+.fill-mor{background:linear-gradient(90deg,#2D5A1E,#4A8A30)}
+.mini-val{color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.58rem;min-width:20px}
+.mini-icon{font-size:.65rem}
+.hud-btns{display:flex;gap:.4rem;margin-top:.35rem}
+.hud-btn{
+  background:var(--coal3);border:1px solid var(--coal5);border-radius:4px;
+  padding:.22rem .45rem;color:var(--text-dim);cursor:pointer;
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  transition:all .15s;text-transform:uppercase;letter-spacing:.05em;
+}
+.hud-btn:active{border-color:var(--brass-dim);color:var(--brass)}
+
+/* NARRATIVE */
+.narrative{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:.7rem;scroll-behavior:smooth}
+.narrative::-webkit-scrollbar{width:3px}
+.narrative::-webkit-scrollbar-thumb{background:var(--coal5);border-radius:2px}
+
+/* Scene image */
+.scene-wrap{width:100%;border-radius:6px;overflow:hidden;border:1px solid var(--coal5);position:relative;background:var(--coal3);animation:fadeIn .5s ease}
+.scene-img{width:100%;display:block;max-height:190px;object-fit:cover;filter:sepia(.4) contrast(1.1) brightness(.85)}
+.scene-loading{width:100%;height:130px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;font-size:.65rem}
+.img-spin{width:28px;height:28px;border:2px solid var(--coal5);border-top-color:var(--brass-dim);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scene-cap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(13,11,9,.9) 0%,transparent 100%);padding:.4rem .7rem;font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--brass-dim)}
+
+/* Messages */
+.msg{max-width:88%;animation:msgIn .3s ease}
+.msg.nar{align-self:flex-start}
+.msg.plr{align-self:flex-end}
+.msg.sys{align-self:center;max-width:100%}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg-who{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--brass-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.22rem}
+.msg-bubble{padding:.65rem .85rem;border-radius:6px;line-height:1.7;font-size:.9rem}
+.msg.nar .msg-bubble{background:var(--coal3);border:1px solid var(--coal4);border-top-left-radius:2px;font-style:italic}
+.msg.plr .msg-bubble{background:var(--coal4);border:1px solid var(--coal5);border-top-right-radius:2px;color:var(--brass-light)}
+.msg.sys .msg-bubble{background:transparent;border:1px solid var(--rust);color:var(--red-bright);font-family:'Special Elite',serif;font-size:.78rem;text-align:center;letter-spacing:.08em;text-transform:uppercase;padding:.4rem 1rem;border-radius:3px}
+.loading-wrap{align-self:flex-start}
+.dots{display:flex;gap:5px;padding:.65rem .85rem;background:var(--coal3);border:1px solid var(--coal4);border-radius:6px;border-top-left-radius:2px;width:fit-content}
+.dots span{width:6px;height:6px;background:var(--brass-dim);border-radius:50%;animation:db 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+
+/* CHOICES */
+.choices{padding:.5rem .75rem;display:flex;flex-direction:column;gap:.4rem;flex-shrink:0}
+.choice{
+  background:var(--coal3);border:1px solid var(--coal5);border-radius:4px;
+  padding:.6rem .8rem;color:var(--text);font-family:'IM Fell English',serif;font-size:.88rem;
+  text-align:left;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:.5rem;position:relative;overflow:hidden;
+}
+.choice::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:var(--rust);transition:width .15s;z-index:0}
+.choice:active{border-color:var(--rust-bright)}
+.choice:active::before{width:4px}
+.c-icon{font-size:.88rem;flex-shrink:0;margin-top:2px;position:relative;z-index:1}
+.c-text{position:relative;z-index:1;line-height:1.4}
+
+/* INPUT */
+.input-area{background:var(--coal2);border-top:1px solid var(--coal4);padding:.55rem .75rem;display:flex;gap:.5rem;align-items:flex-end;flex-shrink:0}
+.custom-input{
+  flex:1;background:var(--coal3);border:1px solid var(--coal4);border-radius:4px;
+  padding:.5rem .75rem;color:var(--text);font-family:'IM Fell English',serif;font-size:.88rem;
+  outline:none;resize:none;max-height:75px;transition:border-color .2s;line-height:1.4;
+}
+.custom-input:focus{border-color:var(--brass-dim)}
+.custom-input::placeholder{color:var(--text-dim);font-style:italic;font-size:.82rem}
+.send-btn{
+  background:var(--rust);border:1px solid var(--rust-bright);border-radius:4px;
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;font-size:1rem;transition:background .2s;color:var(--text);
+}
+.send-btn:active{background:var(--rust-bright)}
+.send-btn:disabled{opacity:.35}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:100;display:none;align-items:flex-end}
+.modal-overlay.active{display:flex;animation:fadeIn .2s}
+.modal{
+  background:var(--coal2);border-top:2px solid var(--brass-dim);border-radius:12px 12px 0 0;
+  padding:1.2rem;width:100%;max-height:75vh;overflow-y:auto;
+  animation:slideUp .3s ease;position:relative;z-index:101;
+}
+.modal-title{font-family:'Special Elite',serif;font-size:.95rem;color:var(--brass-light);margin-bottom:1rem;text-align:center;text-transform:uppercase;letter-spacing:.1em}
+.modal-close{position:absolute;top:.85rem;right:1rem;background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.stat-box{background:var(--coal3);border:1px solid var(--coal5);border-radius:4px;padding:.6rem;text-align:center}
+.stat-val{font-family:'Special Elite',serif;font-size:1.25rem;color:var(--brass-light)}
+.stat-name{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.sec-title{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--brass-dim);text-transform:uppercase;letter-spacing:.15em;margin:.75rem 0 .4rem;display:flex;align-items:center;gap:.5rem}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--coal5)}
+.inv-item{background:var(--coal3);border:1px solid var(--coal5);border-radius:4px;padding:.5rem .7rem;display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.4rem}
+.inv-icon{font-size:1rem;flex-shrink:0}
+.inv-name{color:var(--text);font-size:.83rem}
+.inv-desc{font-size:.7rem;color:var(--text-dim);font-style:italic}
+.fac-row{display:flex;align-items:center;gap:.5rem;padding:.32rem 0;border-bottom:1px solid var(--coal4)}
+.fac-row:last-child{border-bottom:none}
+.fac-icon{font-size:.95rem;flex-shrink:0}
+.fac-name{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--text-dim);flex:1}
+.fac-bar{width:55px;height:5px;background:var(--coal4);border-radius:2px;overflow:hidden}
+.fac-fill{height:100%;border-radius:2px;transition:width .6s}
+.f-ally{background:linear-gradient(90deg,var(--red),var(--red-bright))}
+.f-neut{background:linear-gradient(90deg,var(--coal5),var(--brass-dim))}
+.f-host{background:linear-gradient(90deg,#1a1a2a,#2a2a4a)}
+.fac-lbl{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--text-dim);min-width:50px;text-align:right}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body onload="initApiKey()">
+<div id="app">
+
+
+<!-- INTRO -->
+<div id="screen-intro" class="screen">
+  <svg class="anarchy-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="gg" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#B8860B" stop-opacity=".3"/>
+        <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <circle cx="100" cy="100" r="98" fill="#0D0B09"/>
+    <ellipse cx="100" cy="100" rx="95" ry="95" fill="url(#gg)"/>
+    <!-- Gear teeth -->
+    <g fill="#6B5A0A" opacity=".8">
+      <rect x="92" y="4" width="16" height="24" rx="3"/>
+      <rect x="92" y="172" width="16" height="24" rx="3"/>
+      <rect x="172" y="92" width="24" height="16" rx="3"/>
+      <rect x="4" y="92" width="24" height="16" rx="3"/>
+      <rect x="138" y="18" width="16" height="24" rx="3" transform="rotate(30 146 30)"/>
+      <rect x="46" y="18" width="16" height="24" rx="3" transform="rotate(-30 54 30)"/>
+      <rect x="138" y="158" width="16" height="24" rx="3" transform="rotate(-30 146 170)"/>
+      <rect x="46" y="158" width="16" height="24" rx="3" transform="rotate(30 54 170)"/>
+      <rect x="162" y="138" width="24" height="16" rx="3" transform="rotate(30 174 146)"/>
+      <rect x="14" y="138" width="24" height="16" rx="3" transform="rotate(-30 26 146)"/>
+      <rect x="162" y="46" width="24" height="16" rx="3" transform="rotate(-30 174 54)"/>
+      <rect x="14" y="46" width="24" height="16" rx="3" transform="rotate(30 26 54)"/>
+    </g>
+    <!-- Gear ring -->
+    <circle cx="100" cy="100" r="88" fill="none" stroke="#B8860B" stroke-width="16" opacity=".7"/>
+    <circle cx="100" cy="100" r="80" fill="#0D0B09"/>
+    <!-- Spokes -->
+    <g stroke="#2A2318" stroke-width="6" stroke-linecap="round">
+      <line x1="100" y1="40" x2="100" y2="70"/>
+      <line x1="100" y1="160" x2="100" y2="130"/>
+      <line x1="40" y1="100" x2="70" y2="100"/>
+      <line x1="160" y1="100" x2="130" y2="100"/>
+      <line x1="57" y1="57" x2="78" y2="78"/>
+      <line x1="143" y1="57" x2="122" y2="78"/>
+      <line x1="57" y1="143" x2="78" y2="122"/>
+      <line x1="143" y1="143" x2="122" y2="122"/>
+    </g>
+    <!-- Hub -->
+    <circle cx="100" cy="100" r="20" fill="#1E1A15" stroke="#B8860B" stroke-width="3"/>
+    <circle cx="100" cy="100" r="8" fill="#DAA520" opacity=".6"/>
+    <!-- Red circle -->
+    <circle cx="100" cy="100" r="58" fill="#8B0000" opacity=".92"/>
+    <circle cx="100" cy="100" r="58" fill="none" stroke="#CC2200" stroke-width="4"/>
+    <circle cx="100" cy="100" r="52" fill="none" stroke="#FF3300" stroke-width="1.5" opacity=".4"/>
+    <!-- Anarchist A -->
+    <polygon points="100,44 72,148 84,148 100,76 116,148 128,148" fill="white"/>
+    <rect x="78" y="106" width="44" height="11" rx="2" fill="white"/>
+    <polygon points="100,68 87,106 113,106" fill="#8B0000"/>
+    <!-- Ring on top -->
+    <circle cx="100" cy="100" r="58" fill="none" stroke="#FF2200" stroke-width="3" opacity=".85"/>
+  </svg>
+
+  <div>
+    <div class="game-title">REVOLUTIONARY<br>ROAD</div>
+    <div class="game-subtitle">◈ Anno 2187 del Cyberstato ◈</div>
+  </div>
+  <div class="divider"><span>⚙</span></div>
+  <p class="intro-lore">
+    "Il vapore che muove le loro macchine viene dalle nostre ossa. L'elettricità nelle loro vene era il sangue dei nostri fratelli. Oggi organizziamo la resa dei conti."
+    <br><br>— Manifesto Clandestino, anno 2187
+  </p>
+  <button class="btn primary" onclick="showScreen('char')">▸ Unisciti alla Resistenza</button>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);text-align:center;line-height:1.6">
+    AI NARRATIVA · IMMAGINI GENERATE IN TEMPO REALE
+  </div>
+</div>
+
+<!-- CHAR -->
+<div id="screen-char" class="screen">
+<div>
+  <div class="screen-title">⚙ Profilo Clandestino</div>
+  <div>
+    <div class="field-label">Nome di battaglia</div>
+    <input type="text" id="charName" class="text-input" placeholder="Es: Ferro Rosso, La Volpe..." maxlength="24">
+  </div>
+  <div>
+    <div class="field-label">Scegli la tua Fazione</div>
+    <div class="faction-list">
+      <div class="faction-card" data-faction="minatori" onclick="selectFaction(this)">
+        <span class="faction-icon">⛏️</span>
+        <div>
+          <div class="faction-name">Minatori del Sottosuolo</div>
+          <div class="faction-desc">Forza bruta, tunnel e esplosivi artigianali.</div>
+          <div class="faction-stats">⚡ FORZA:18 | FURTIVITÀ:10 | INFLUENZA:12 | TECNICA:10</div>
+        </div>
+      </div>
+      <div class="faction-card" data-faction="ingegneri" onclick="selectFaction(this)">
+        <span class="faction-icon">🔧</span>
+        <div>
+          <div class="faction-name">Ingegneri Ribelli</div>
+          <div class="faction-desc">Sabotaggio degli impianti dall'interno.</div>
+          <div class="faction-stats">⚡ FORZA:10 | FURTIVITÀ:12 | INFLUENZA:14 | TECNICA:20</div>
+        </div>
+      </div>
+      <div class="faction-card" data-faction="contrabbandieri" onclick="selectFaction(this)">
+        <span class="faction-icon">🚂</span>
+        <div>
+          <div class="faction-name">Contrabbandieri dei Treni</div>
+          <div class="faction-desc">Logistica, rotte segrete e traffico d'armi.</div>
+          <div class="faction-stats">⚡ FORZA:12 | FURTIVITÀ:18 | INFLUENZA:16 | TECNICA:12</div>
+        </div>
+      </div>
+      <div class="faction-card" data-faction="stampa" onclick="selectFaction(this)">
+        <span class="faction-icon">📰</span>
+        <div>
+          <div class="faction-name">Stampatori Clandestini</div>
+          <div class="faction-desc">Propaganda, agitazione e reclutamento.</div>
+          <div class="faction-stats">⚡ FORZA:8 | FURTIVITÀ:14 | INFLUENZA:20 | TECNICA:12</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="field-label">La tua storia (opzionale)</div>
+    <input type="text" id="charBg" class="text-input" placeholder="Es: Mio padre morì nelle miniere..." maxlength="80">
+  </div>
+  <button class="btn primary" id="startBtn" onclick="startGame()" disabled>▸ Inizia la Rivoluzione</button>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-top">
+      <div class="hud-avatar" id="hudAvatar">⚙️</div>
+      <div>
+        <div class="hud-name" id="hudName">Rivoluzionario</div>
+        <div class="hud-sub" id="hudSub">— — —</div>
+      </div>
+      <div class="hud-right">
+        <div class="rev-label">◈ RIVOLUZIONE</div>
+        <div class="rev-track"><div class="rev-fill" id="revBar" style="width:0%"></div></div>
+        <div class="rev-pct" id="revPct">0%</div>
+      </div>
+    </div>
+    <div class="hud-stats">
+      <div class="mini-stat"><span class="mini-icon">❤️</span><div class="mini-bar"><div class="mini-fill fill-hp" id="hpBar" style="width:100%"></div></div><div class="mini-val" id="hpVal">100</div></div>
+      <div class="mini-stat"><span class="mini-icon">🔵</span><div class="mini-bar"><div class="mini-fill fill-inf" id="infBar" style="width:50%"></div></div><div class="mini-val" id="infVal">50</div></div>
+      <div class="mini-stat"><span class="mini-icon">✊</span><div class="mini-bar"><div class="mini-fill fill-mor" id="morBar" style="width:60%"></div></div><div class="mini-val" id="morVal">60</div></div>
+      <div class="mini-stat"><span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--brass-dim)">LV</span><div style="font-family:'Special Elite',serif;font-size:.85rem;color:var(--brass);margin-left:2px" id="lvlVal">1</div></div>
+    </div>
+    <div class="hud-btns">
+      <button class="hud-btn" onclick="openStats()">📋 Scheda</button>
+      <button class="hud-btn" onclick="openFactions()">✊ Fazioni</button>
+      <button class="hud-btn" onclick="openLog()">📜 Log</button>
+    </div>
+  </div>
+  <div class="narrative" id="narrative"></div>
+  <div class="choices" id="choices"></div>
+  <div class="input-area">
+    <textarea class="custom-input" id="customInput" placeholder="Impartisci un ordine o agisci..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendCustom()">▶</button>
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="statsModal" onclick="closeModal('statsModal',event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('statsModal')">✕</button>
+    <div class="modal-title">📋 Profilo Clandestino</div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="sec-title">Inventario</div>
+    <div id="invList"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="facModal" onclick="closeModal('facModal',event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('facModal')">✕</button>
+    <div class="modal-title">✊ Stato delle Fazioni</div>
+    <div id="facList"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--text-dim);margin-top:.75rem;line-height:1.6">Recluta tutte le fazioni per scatenare la rivoluzione finale.</div>
+  </div>
+</div>
+<div class="modal-overlay" id="logModal" onclick="closeModal('logModal',event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('logModal')">✕</button>
+    <div class="modal-title">📜 Diario della Rivoluzione</div>
+    <div id="logList" style="display:flex;flex-direction:column;gap:.4rem"></div>
+  </div>
+</div>
+
+<script>
+
+// PROXY URL — inserisci qui il tuo Cloudflare Worker URL dopo averlo creato
+const PROXY_URL = 'https://revolutionaryroad.karontekillah.workers.dev';
+
+function initApiKey() {
+  // No API key needed — proxy handles it
+  showScreen('intro');
+}
+
+const G={
+  name:'',faction:'',bg:'',
+  hp:100,maxHp:100,inf:50,maxInf:100,mor:60,maxMor:100,
+  rev:0,lv:1,xp:0,xpN:100,
+  inv:[],log:[],hist:[],turn:0,busy:false,
+  facs:{
+    minatori:{name:'Minatori del Sottosuolo',icon:'⛏️',val:0,lbl:'Neutrale'},
+    ingegneri:{name:'Ingegneri Ribelli',icon:'🔧',val:0,lbl:'Neutrale'},
+    contrabbandieri:{name:'Contrabbandieri',icon:'🚂',val:0,lbl:'Neutrale'},
+    stampa:{name:'Stampatori Clandestini',icon:'📰',val:0,lbl:'Neutrale'},
+    guardie:{name:'Guardie del Cyberstato',icon:'🤖',val:-100,lbl:'Ostile'},
+  },
+  stats:{forza:10,furtività:10,influenza:14,tecnica:12}
+};
+const FICONS={minatori:'⛏️',ingegneri:'🔧',contrabbandieri:'🚂',stampa:'📰'};
+const FBASE={
+  minatori:{forza:18,furtività:10,influenza:12,tecnica:10,hp:130,inv:[{icon:'⛏️',name:'Piccone da minatore',desc:'Arma pesante nei tunnel'},{icon:'💣',name:'Bomba al carbone',desc:'Artigianale ma efficace'}]},
+  ingegneri:{forza:10,furtività:12,influenza:14,tecnica:20,hp:90,inv:[{icon:'🔧',name:'Kit da sabotaggio',desc:'Disattiva macchinari e circuiti'},{icon:'📐',name:'Schemi delle fabbriche',desc:'Mappe degli impianti'}]},
+  contrabbandieri:{forza:12,furtività:18,influenza:16,tecnica:12,hp:100,inv:[{icon:'🗺️',name:'Mappa passaggi segreti',desc:'Rotte clandestine'},{icon:'🔫',name:'Pistola a vapore',desc:'Silenziosa e affidabile'}]},
+  stampa:{forza:8,furtività:14,influenza:20,tecnica:12,hp:80,inv:[{icon:'📰',name:'Manifesti rivoluzionari',desc:'+5 morale per distribuzione'},{icon:'🖊️',name:'Stampa portatile',desc:'Produce propaganda ovunque'}]}
+};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active')}
+function selectFaction(el){document.querySelectorAll('.faction-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');G.faction=el.dataset.faction;checkStart()}
+document.getElementById('charName').addEventListener('input',checkStart);
+function checkStart(){document.getElementById('startBtn').disabled=!(document.getElementById('charName').value.trim()&&G.faction)}
+
+function startGame(){
+  G.name=document.getElementById('charName').value.trim();
+  G.bg=document.getElementById('charBg').value.trim()||'ignote';
+  const b=FBASE[G.faction];
+  G.maxHp=b.hp;G.hp=b.hp;
+  G.stats={forza:b.forza,furtività:b.furtività,influenza:b.influenza,tecnica:b.tecnica};
+  G.inv=[...b.inv];
+  G.facs[G.faction].val=80;G.facs[G.faction].lbl='Alleata';
+  document.getElementById('hudAvatar').textContent=FICONS[G.faction];
+  document.getElementById('hudName').textContent=G.name;
+  document.getElementById('hudSub').textContent='— '+G.facs[G.faction].name+' —';
+  updateHUD();showScreen('game');beginGame();
+}
+
+function updateHUD(){
+  document.getElementById('hpBar').style.width=(G.hp/G.maxHp*100)+'%';
+  document.getElementById('infBar').style.width=(G.inf/G.maxInf*100)+'%';
+  document.getElementById('morBar').style.width=(G.mor/G.maxMor*100)+'%';
+  document.getElementById('hpVal').textContent=G.hp;
+  document.getElementById('infVal').textContent=G.inf;
+  document.getElementById('morVal').textContent=G.mor;
+  document.getElementById('lvlVal').textContent=G.lv;
+  const r=Math.min(100,Math.round(G.rev));
+  document.getElementById('revBar').style.width=r+'%';
+  document.getElementById('revPct').textContent=r+'%';
+}
+
+function addMsg(type,text,who=''){
+  const a=document.getElementById('narrative');
+  const d=document.createElement('div');d.className='msg '+type;
+  d.innerHTML=(who?`<div class="msg-who">${who}</div>`:'')+`<div class="msg-bubble">${text}</div>`;
+  a.appendChild(d);scrollD();
+}
+function addSys(t){addMsg('sys',t)}
+
+function addImg(prompt,cap){
+  const a=document.getElementById('narrative');
+  const w=document.createElement('div');w.className='scene-wrap';
+  w.innerHTML=`<div class="scene-loading"><div class="img-spin"></div><div>Generazione scena...</div></div><div class="scene-cap">${cap}</div>`;
+  a.appendChild(w);scrollD();
+  genImg(prompt,w,cap);
+}
+
+async function genImg(prompt,wrap,cap){
+  try{
+    const r=await fetch(PROXY_URL,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+        messages:[{role:'user',content:`Write a Stable Diffusion prompt (max 60 words) for this steampunk dystopian scene: "${prompt}". Style: dark industrial steampunk, 1920s meets cyberpunk, dramatic chiaroscuro lighting, coal smoke, brass machinery, oppressed workers. Return ONLY the prompt.`}]
+      })
+    });
+    const d=await r.json();
+    const ip=(d.content?.map(b=>b.text||'').join('')||'').trim();
+    const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(ip+', steampunk dystopia, dark industrial, cinematic')}`+`?width=480&height=190&nologo=true&seed=${Math.floor(Math.random()*9999)}`;
+    const img=new Image();
+    img.onload=()=>{wrap.innerHTML=`<img src="${url}" class="scene-img" alt="${cap}"><div class="scene-cap">📷 ${cap}</div>`;scrollD()};
+    img.onerror=()=>{wrap.innerHTML=`<div style="padding:.75rem;text-align:center;font-size:1.5rem">🏭</div>`;scrollD()};
+    img.src=url;
+  }catch(e){wrap.innerHTML=`<div style="padding:.5rem;text-align:center;color:var(--text-dim);font-size:.75rem">[ Immagine non disponibile ]</div>`}
+}
+
+function showLoad(){const a=document.getElementById('narrative');const d=document.createElement('div');d.className='loading-wrap';d.id='loadMsg';d.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';a.appendChild(d);scrollD()}
+function hideLoad(){const e=document.getElementById('loadMsg');if(e)e.remove()}
+function scrollD(){const a=document.getElementById('narrative');setTimeout(()=>a.scrollTop=a.scrollHeight,50)}
+
+function setChoices(cs){
+  const a=document.getElementById('choices');a.innerHTML='';
+  cs.forEach(c=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span class="c-icon">${c.icon||'▸'}</span><span class="c-text">${c.text}</span>`;b.onclick=()=>act(c.text);a.appendChild(b)});
+}
+function clrChoices(){document.getElementById('choices').innerHTML=''}
+
+async function beginGame(){
+  addSys('◈ ANNO 2187 DEL CYBERSTATO ◈');
+  addSys('LA RIVOLUZIONE È INIZIATA');
+  await callAI(startPrompt(),true);
+}
+
+function startPrompt(){
+  return`Sei il narratore di un GDR steampunk distopico in italiano — Anno 2187 del Cyberstato.
+
+AMBIENTAZIONE: Il Cyberstato è governato dai Manifattori, cyborg capitalisti ibridi. I lavoratori umani vivono in quartieri fumosi e oppressivi. La Polizia del Vapore reprime ogni dissenso.
+
+OBIETTIVO: Portare il metro rivoluzionario al 100% alleando 4 fazioni di lavoratori e guidando la rivolta finale.
+
+PERSONAGGIO: ${G.name}, fazione ${G.facs[G.faction].name}, origini: ${G.bg}, HP ${G.hp}/${G.maxHp}.
+
+Scrivi la scena di apertura (5-6 frasi evocative). Poi 3 scelte:
+[1] EMOJI Azione
+[2] EMOJI Azione
+[3] EMOJI Azione
+
+Aggiungi: IMMAGINE: [breve descrizione scena]`;
+}
+
+async function callAI(prompt,first=false){
+  if(G.busy)return;G.busy=true;
+  document.getElementById('sendBtn').disabled=true;
+  clrChoices();showLoad();
+  const msgs=[...G.hist,{role:'user',content:prompt}];
+  try{
+    const r=await fetch(PROXY_URL,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,system:sysPrompt(),messages:msgs})
+    });
+    const d=await r.json();
+    const txt=d.content?.map(b=>b.text||'').join('')||'';
+    hideLoad();
+    const p=parse(txt);
+    G.hist.push({role:'user',content:prompt},{role:'assistant',content:txt});
+    if(G.hist.length>20)G.hist=G.hist.slice(-16);
+    if(p.img)addImg(p.img,p.imgCap||'Scena corrente');
+    addMsg('nar',p.nar,'📖 Cronache del Cyberstato');
+    applyFx(txt);
+    G.log.unshift({t:G.turn+1,txt:p.nar.slice(0,80)+'...'});
+    if(G.log.length>20)G.log.pop();
+    p.choices.length?setChoices(p.choices):defaultChoices();
+    G.turn++;
+    if(G.rev>=100)setTimeout(revolution,1000);
+  }catch(e){
+    hideLoad();
+    addMsg('nar','Le reti clandestine sono interrotte... (Riprova.)');
+    defaultChoices();
+  }
+  G.busy=false;document.getElementById('sendBtn').disabled=false;
+}
+
+function sysPrompt(){
+  return`Narratore GDR steampunk distopico italiano. Anno 2187.
+- Tono: oppressivo, rivoluzionario, epico
+- Nemici: Guardie Vapore, Automi Polizia, Manifattori Cyborg, Spie Meccaniche
+- Scrivi DANNO: X per danni, INFLUENZA: +X, MORALE: ±X, FAZIONE_ALLEATA: nome, RIVOLUZIONE: +X
+- Sempre 3 scelte: [1] EMOJI testo [2] EMOJI testo [3] EMOJI testo
+- Aggiungi IMMAGINE: descrizione breve scena
+- Personaggio: ${G.name}, ${G.faction}, LV${G.lv}, HP ${G.hp}/${G.maxHp}, Rev ${Math.round(G.rev)}%`;
+}
+
+function parse(txt){
+  const cr=/\[(\d)\]\s*([\S\u{1F300}-\u{1FFFF}⚙️⛏️🔧🚂📰🤖✊⚔️💣🔥🏭]*)\s*([^\n\[]+)/gu;
+  const choices=[];let m;
+  while((m=cr.exec(txt))!==null){const ic=m[2]?.trim()||'▸';const t=m[3]?.trim();if(t)choices.push({icon:ic,text:t})}
+  const im=txt.match(/IMMAGINE:\s*([^\n]+)/i);
+  const img=im?im[1].trim():null;
+  const imgCap=img?img.slice(0,50):'';
+  let nar=txt.replace(/\[\d\][^\n]*/g,'').replace(/IMMAGINE:[^\n]*/gi,'').replace(/DANNO:\s*\d+/gi,'').replace(/INFLUENZA:\s*[+-]?\d+/gi,'').replace(/MORALE:\s*[+-]?\d+/gi,'').replace(/FAZIONE_ALLEATA:\s*\w+/gi,'').replace(/RIVOLUZIONE:\s*[+-]?\d+/gi,'').replace(/\n{3,}/g,'\n\n').trim();
+  return{nar,choices,img,imgCap};
+}
+
+function applyFx(txt){
+  let ch=false;
+  const dmg=txt.match(/DANNO:\s*(\d+)/i);if(dmg){G.hp=Math.max(0,G.hp-parseInt(dmg[1]));ch=true}
+  const inf=txt.match(/INFLUENZA:\s*([+-]?\d+)/i);if(inf){G.inf=Math.min(G.maxInf,Math.max(0,G.inf+parseInt(inf[1])));ch=true}
+  const mor=txt.match(/MORALE:\s*([+-]?\d+)/i);if(mor){G.mor=Math.min(G.maxMor,Math.max(0,G.mor+parseInt(mor[1])));ch=true}
+  const rev=txt.match(/RIVOLUZIONE:\s*([+-]?\d+)/i);
+  if(rev){G.rev=Math.min(100,Math.max(0,G.rev+parseInt(rev[1])));ch=true}
+  else{G.rev=Math.min(100,G.rev+(G.turn%3===0?3:1));ch=true}
+  const fa=txt.match(/FAZIONE_ALLEATA:\s*(\w+)/i);
+  if(fa){const fn=fa[1].toLowerCase();if(G.facs[fn]){G.facs[fn].val=100;G.facs[fn].lbl='Alleata';addSys(`✊ ${G.facs[fn].name} si unisce alla rivoluzione!`);G.rev=Math.min(100,G.rev+15);ch=true}}
+  if(G.hp<=0){G.hp=Math.floor(G.maxHp*.25);addSys('⚠️ Sei caduto... i compagni ti salvano. Continua la lotta.')}
+  G.xp+=10+G.lv*3;
+  if(G.xp>=G.xpN){G.xp-=G.xpN;G.lv++;G.xpN=Math.floor(G.xpN*1.5);G.maxHp+=10;G.hp=Math.min(G.maxHp,G.hp+20);G.inf=Math.min(G.maxInf,G.inf+5);addSys(`⬆️ Livello ${G.lv} — La tua reputazione cresce.`);ch=true}
+  if(ch)updateHUD();
+}
+
+function defaultChoices(){
+  setChoices([{icon:'✊',text:'Organizza un incontro segreto con altre fazioni'},{icon:'💣',text:'Pianifica un sabotaggio alle fabbriche'},{icon:'📰',text:'Diffondi propaganda nel quartiere operaio'}]);
+}
+
+function revolution(){
+  clrChoices();addSys('🔴 LA RIVOLUZIONE È PRONTA!');
+  addMsg('nar','I fischi delle fabbriche tacciono. Le strade si riempiono di operai con torce e picconi. Il Cyberstato trema. È il momento della resa dei conti finale.','📖 LA NOTTE DELLA RIVOLUZIONE');
+  addImg('Rivoluzione finale, operai che marciano verso il palazzo dei Manifattori Cyborg, bandiere rosse, vapore e fuoco','La Notte della Rivoluzione');
+  setChoices([{icon:'⚔️',text:"Guida l'assalto al Palazzo dei Manifattori"},{icon:'💣',text:'Fai saltare la Centrale del Vapore'},{icon:'📻',text:'Trasmetti il discorso finale su tutte le frequenze'}]);
+}
+
+function act(txt){if(G.busy)return;addMsg('plr',txt,'✊ '+G.name);callAI(actPrompt(txt))}
+
+function actPrompt(a){
+  const ally=Object.entries(G.facs).filter(([k,v])=>v.val>=50&&k!=='guardie').map(([k,v])=>v.name).join(', ')||'nessuna';
+  return`Azione: "${a}"\nStato: HP ${G.hp}/${G.maxHp} | Influenza: ${G.inf} | Morale: ${G.mor} | Rev: ${Math.round(G.rev)}%\nFazioni alleate: ${ally}\nTurno: ${G.turn}\n\nDescrivi conseguenze in modo epico (4-5 frasi). Includi tag statistici se rilevante. Poi 3 nuove scelte. Aggiungi IMMAGINE: descrizione.`;
+}
+
+function sendCustom(){const i=document.getElementById('customInput');const t=i.value.trim();if(!t||G.busy)return;i.value='';i.style.height='';act(t)}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCustom()}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,75)+'px'}
+
+function openStats(){
+  document.getElementById('statsGrid').innerHTML=[
+    {v:G.hp+'/'+G.maxHp,n:'❤️ Vitalità'},{v:G.inf,n:'🔵 Influenza'},
+    {v:G.mor,n:'✊ Morale'},{v:Math.round(G.rev)+'%',n:'🔴 Rivoluzione'},
+    {v:G.lv,n:'⭐ Livello'},{v:G.stats.forza,n:'💪 Forza'},
+    {v:G.stats.furtività,n:'👁️ Furtività'},{v:G.stats.tecnica,n:'⚙️ Tecnica'}
+  ].map(s=>`<div class="stat-box"><div class="stat-val">${s.v}</div><div class="stat-name">${s.n}</div></div>`).join('');
+  document.getElementById('invList').innerHTML=G.inv.length===0?'<div style="color:var(--text-dim);font-size:.83rem;font-style:italic">Inventario vuoto</div>':G.inv.map(i=>`<div class="inv-item"><span class="inv-icon">${i.icon}</span><div><div class="inv-name">${i.name}</div><div class="inv-desc">${i.desc}</div></div></div>`).join('');
+  document.getElementById('statsModal').classList.add('active');
+}
+
+function openFactions(){
+  document.getElementById('facList').innerHTML=Object.entries(G.facs).map(([k,f])=>{
+    const pct=Math.max(0,Math.min(100,(f.val+100)/2));
+    const cl=f.val>=50?'f-ally':f.val<=-50?'f-host':'f-neut';
+    return`<div class="fac-row"><span class="fac-icon">${f.icon}</span><div class="fac-name">${f.name}</div><div class="fac-bar"><div class="fac-fill ${cl}" style="width:${pct}%"></div></div><div class="fac-lbl">${f.lbl}</div></div>`;
+  }).join('');
+  document.getElementById('facModal').classList.add('active');
+}
+
+function openLog(){
+  document.getElementById('logList').innerHTML=G.log.length===0?'<div style="color:var(--text-dim);font-size:.83rem;font-style:italic">Nessuna voce ancora.</div>':G.log.map(e=>`<div style="background:var(--coal3);border:1px solid var(--coal5);border-radius:4px;padding:.45rem .65rem"><div style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--brass-dim);margin-bottom:.2rem">TURNO ${e.t}</div><div style="font-size:.8rem;color:var(--text-dim);font-style:italic;line-height:1.5">${e.txt}</div></div>`).join('');
+  document.getElementById('logModal').classList.add('active');
+}
+
+function closeModal(id,e){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('active')}
+</script>
+</body>
+</html>
